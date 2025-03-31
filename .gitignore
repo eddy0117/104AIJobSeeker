@@ -1,0 +1,7 @@
+tests/
+.vscode/
+get_proxy/
+__pycache__/
+*.pyc
+config.yaml
+user_prompt.txt
