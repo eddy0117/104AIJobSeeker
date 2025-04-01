@@ -686,4 +686,3 @@ jobcat_list = [['經營／人資類', '2001000000'],
 
 ---
 
-**(End of Improved Prompt)**

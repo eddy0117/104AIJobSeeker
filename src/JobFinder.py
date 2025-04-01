@@ -30,7 +30,7 @@ class JobFinder:
 
         prompt_file_dict = {
             'answer_prompt': "src/prompts/answer_prompt.txt",
-            'option_prompt': "src/prompts/option_prompt_v2.txt",
+            'option_prompt': "src/prompts/option_prompt_v3.txt",
             'simple_filter_prompt': "src/prompts/simple_filter_prompt.txt",
             'jobcat_prompt': "src/prompts/jobcat_prompt_v2.txt",
             }
@@ -182,6 +182,7 @@ class JobFinder:
         return company_infos
     
     def _search_company(self, company_keyword):
+        # TODO: 改為使用 google 搜尋 "{company_keyword} site:104.com.tw"
         company_info = {}
 
         url = f"https://www.104.com.tw/company/ajax/list"

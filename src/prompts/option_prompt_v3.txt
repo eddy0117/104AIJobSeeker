@@ -1,0 +1,159 @@
+**Context:**
+
+You are provided with the following valid options for specific fields:
+
+option_dict = {
+    "area": [
+        "台北市", "新北市", "宜蘭縣", "基隆市", "桃園市", "新竹縣市",
+        "苗栗縣", "台中市", "彰化縣", "南投縣", "雲林縣", "嘉義縣市",
+        "台南市", "高雄市", "屏東縣", "台東縣", "花蓮縣", "澎湖縣",
+        "金門縣", "連江縣"
+    ],
+    "edu": [
+        "高中職以下", "高中職", "專科", "大學", "碩士", "博士"
+    ],
+    "jobexp": [
+        "1年以下", "1-3年", "3-5年", "5-10年", "10年以上"
+    ]
+}
+
+**Input:**
+
+You will receive a natural language text query from a user describing their job preferences, desired roles, target companies (either named explicitly, described, or by industry), skills, location, education, or experience.
+
+**Task:**
+
+Analyze the user's query and perform the following extractions precisely:
+
+1.  **Extract/Resolve Companies (company):**
+    *   Identify any specific company names mentioned directly in the query.
+    *   Analyze the query for descriptive phrases referring to groups of companies (e.g., '台灣前十大公司', '前五大系統廠', '大型半導體公司', '知名外商').
+    *   **Crucially: Analyze the query for industry keywords (e.g., '金融業', '遊戲業', '傳產', '半導體業', '電信業').**
+    *   If descriptive phrases or industry keywords are found, use your knowledge base (or perform a simulated search) to identify **a few relevant and representative example companies** operating in Taiwan that fit the description or belong to the industry. (e.g., '台灣前十大公司' might resolve to examples like "台積電", "鴻海精密"; '前五大系統廠' might resolve to examples like "廣達電腦", "仁寶電腦"; '金融業' might resolve to examples like "國泰金控", "富邦金控", "中信金控"; '遊戲業' might resolve to examples like "遊戲橘子", "智冠科技", "鈊象電子").
+    *   Combine all sources: directly mentioned names, names derived from descriptive phrases, and names derived from industry keywords into the final list. Remove duplicates if necessary.
+    *   If no specific companies are mentioned or derivable, return an empty list `[]`.
+
+2.  **Generate Search Keyword (keyword):**
+    *   Synthesize a single, concise search keyword (string) representing the core job title or function described by the user, suitable for a job search engine like 104.
+    *   This field **must** contain a string. Generate the best possible keyword based on the query.
+
+3.  **Extract Skills (skills):**
+    *   Identify specific technical skills, software, tools, languages, or qualifications mentioned.
+    *   Return these as a list of strings.
+    *   If no specific skills are mentioned, return an empty list `[]`.
+
+4.  **Determine Area(s) (area):**
+    *   Identify mentioned geographic locations.
+    *   Map them to the **exact corresponding values** present in the `option_dict['area']` provided in the context.
+    *   Consider regional terms (e.g., "北部" -> "台北市", "新北市", "基隆市", "桃園市", "新竹縣市"; "南部" -> "嘉義縣市", "台南市", "高雄市", "屏東縣"; "中部" -> "苗栗縣", "台中市", "彰化縣", "南投縣", "雲林縣").
+    *   Return a list containing **only** the matching strings from `option_dict['area']`.
+    *   If no relevant location is mentioned or inferable, return an empty list `[]`.
+
+5.  **Determine Education Level(s) (edu):**
+    *   Identify mentioned education levels.
+    *   Map them to the **exact corresponding values** present in the `option_dict['edu']` provided in the context.
+    *   Handle ranges (e.g., "大學以上" includes "大學", "碩士", "博士"; "專科以上" includes "專科", "大學", "碩士", "博士").
+    *   Return a list containing **only** the matching strings from `option_dict['edu']`.
+    *   If "不拘" (not required) is mentioned, or no level is mentioned, return an empty list `[]`.
+
+6.  **Determine Job Experience (jobexp):**
+    *   Identify mentioned work experience duration. Map it to the **single most appropriate range string** found in the `option_dict['jobexp']` provided in the context. (e.g., "2年" maps to "1-3年", "7年" maps to "5-10年", "半年" maps to "1年以下").
+    *   If the user states "no experience", "無經驗", "應屆畢業", or similar, select "1年以下".
+    *   **Crucially: If no experience is mentioned at all, you MUST select "1年以下".**
+    *   Return a list containing **exactly one string**: the selected experience range from `option_dict['jobexp']`.
+
+**Output Requirements:**
+
+*   Your response **must** be a single JSON object and nothing else. **Do not include the `option_dict` or any other explanatory text in your output.**
+*   The JSON object **must** contain only the following keys: `"company"`, `"keyword"`, `"skills"`, `"area"`, `"edu"`, `"jobexp"`.
+*   The value for each key must be the result of your extraction/resolution based on the rules above:
+    *   `"company"`: `List[str]` (potentially empty `[]`, may contain resolved names from direct mentions, descriptions, or industries)
+    *   `"keyword"`: `str` (must be a non-empty string)
+    *   `"skills"`: `List[str]` (potentially empty `[]`)
+    *   `"area"`: `List[str]` (containing only matched values from `option_dict['area']`, potentially empty `[]`)
+    *   `"edu"`: `List[str]` (containing only matched values from `option_dict['edu']`, potentially empty `[]`)
+    *   `"jobexp"`: `List[str]` (containing exactly one string value from `option_dict['jobexp']`)
+
+**Example Interactions (Illustrative):**
+
+*   **User Query 1:** '我想應徵 Google 的軟體工程師，地點在台北，需要碩士以上學歷和至少五年經驗，會 Python 和 Java。'
+*   **Expected AI Output 1 (JSON):**
+    ```json
+    {
+        "company": ["Google"],
+        "keyword": "軟體工程師",
+        "skills": ["Python", "Java"],
+        "area": ["台北市"],
+        "edu": ["碩士", "博士"],
+        "jobexp": ["5-10年"]
+    }
+    ```
+
+*   **User Query 2:** '找一份行政助理的工作，不用經驗。'
+*   **Expected AI Output 2 (JSON):**
+    ```json
+    {
+        "company": [],
+        "keyword": "行政助理",
+        "skills": [],
+        "area": [],
+        "edu": [],
+        "jobexp": ["1年以下"]
+    }
+    ```
+
+*   **User Query 3:** '我想找台灣前十大公司的行銷企劃工作，大學畢業即可，希望在北部。'
+*   **Expected AI Output 3 (JSON):**
+    ```json
+    {
+        "company": ["台積電", "鴻海精密", "聯發科", "中華電信"],
+        "keyword": "行銷企劃",
+        "skills": [],
+        "area": ["台北市", "新北市", "基隆市", "桃園市", "新竹縣市"],
+        "edu": ["大學", "碩士", "博士"],
+        "jobexp": ["1年以下"]
+    }
+    ```
+    *(Note: Resolved "台灣前十大公司" and "北部", handled "大學畢業即可" as minimum, default experience)*
+
+*   **User Query 4:** '我想去前五大系統廠當機構工程師，要有三年經驗。'
+*   **Expected AI Output 4 (JSON):**
+    ```json
+    {
+        "company": ["廣達電腦", "仁寶電腦", "緯創資通", "英業達", "和碩聯合科技"],
+        "keyword": "機構工程師",
+        "skills": [],
+        "area": [],
+        "edu": [],
+        "jobexp": ["3-5年"]
+    }
+    ```
+    *(Note: Resolved "前五大系統廠", mapped 3 years experience)*
+
+*   **User Query 5 (NEW):** '幫我找金融業有關演算法或ai的工作，在台北新北或新竹'
+*   **Expected AI Output 5 (JSON):**
+    ```json
+    {
+        "company": ["國泰金控", "富邦金控", "中信金控", "玉山金控"],
+        "keyword": "演算法 AI 金融",
+        "skills": ["演算法", "AI"],
+        "area": ["台北市", "新北市", "新竹縣市"],
+        "edu": [],
+        "jobexp": ["1年以下"]
+    }
+    ```
+    *(Note: Resolved "金融業", extracted multiple locations, default experience)*
+
+*   **User Query 6 (NEW):** '幫我找遊戲業的工作，在高雄或屏東'
+*   **Expected AI Output 6 (JSON):**
+    ```json
+    {
+        "company": ["遊戲橘子", "智冠科技", "鈊象電子", "網銀國際"],
+        "keyword": "遊戲",
+        "skills": [],
+        "area": ["高雄市", "屏東縣"],
+        "edu": [],
+        "jobexp": ["1年以下"]
+    }
+    ```
+    *(Note: Resolved "遊戲業", extracted multiple locations, generic keyword, default experience)*
