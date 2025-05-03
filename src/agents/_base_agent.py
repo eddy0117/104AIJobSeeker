@@ -1,10 +1,11 @@
 import openai
 import logging
+from langchain_openai import ChatOpenAI
 
 class BaseAgent:
-    def __init__(self, api_key, model, base_prompt):
-        openai.api_key = api_key
-        self.model = model
+    def __init__(self, model, base_prompt):
+        
+        self.model = ChatOpenAI(model=model)
         self.base_prompt = base_prompt
 
     def call_openai_api(self, content_prompt="", user_prompt=""):

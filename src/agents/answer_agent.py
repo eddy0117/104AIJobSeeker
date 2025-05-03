@@ -4,8 +4,8 @@ from ._base_agent import BaseAgent
 
 class AnswerAgent(BaseAgent):
     # 修正建構子名稱
-    def __init__(self, api_key, model, base_prompt):
-        super().__init__(api_key, model, base_prompt)
+    def __init__(self, model, base_prompt):
+        super().__init__(model, base_prompt)
         # 若需要共用設定，可視需求移至 utils/config 載入
         self.option_dict = None
         with open("src/json/option_map.json", 'r', encoding='utf-8') as f:

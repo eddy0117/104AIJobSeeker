@@ -5,8 +5,8 @@ from ..utils.config import load_json   # 新增工具函數引入
 
 class OptionAgent(BaseAgent):
     # 如有需要，可擴充 AnswerAgent 特有功能
-    def __init__(self, api_key, model, base_prompt):
-        super().__init__(api_key, model, base_prompt)
+    def __init__(self, model, base_prompt):
+        super().__init__(model, base_prompt)
         # 改用 utils/config 載入 option_map.json
         self.option_dict = load_json("src/json/option_map.json", encoding='utf-8')
 

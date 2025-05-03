@@ -4,8 +4,8 @@ from ._base_agent import BaseAgent
 
 class SimpleFilterAgent(BaseAgent):
     # 如有需要，可擴充 AnswerAgent 特有功能
-    def __init__(self, api_key, model, base_prompt):
-        super().__init__(api_key, model, base_prompt)
+    def __init__(self, model, base_prompt):
+        super().__init__(model, base_prompt)
 
 
     def ask_agent(self, content_prompt="", user_prompt=""):

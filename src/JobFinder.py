@@ -301,7 +301,7 @@ class JobFinder:
         keyword = search_opt_dict.get('keyword', '')
         
         if len(companys) > 0:
-            # 先搜尋公司")
+            # 先搜尋公司
             company_infos = self.search_company(companys)
             for company_info in company_infos:
                 # 取得公司職缺

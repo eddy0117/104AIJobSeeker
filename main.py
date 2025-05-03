@@ -19,7 +19,7 @@ def main():
         config = yaml.safe_load(file)
     api_key = config["api_key"]
     job_finder = JobFinder(api_key)
-    user_prompt = "科技業的工作有哪些？\n" 
+    user_prompt = "碩畢，台中或新竹，遊戲業相關？\n" 
     # response, jobs_detail = job_finder.find_job(user_prompt, return_amount=15)
     response = job_finder.search(user_prompt)
     print("Response:", response)
